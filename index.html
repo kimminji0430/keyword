@@ -20,15 +20,19 @@
     <script>
         function recommend() {
             let text = document.getElementById("textInput").value;
-            // 한글, 영어, 숫자만 추출 + 줄바꿈/특수문자 모두 공백 처리
+
+            // 특수문자·영어·숫자 모두 제거, 한글 단어만 추출
+            // (한글 2글자 이상만 키워드로 인정)
             let words = text
-                .replace(/[^가-힣a-zA-Z0-9\s]/g, " ")
-                .replace(/\s+/g, " ")
+                .replace(/[^가-힣\s]/g, " ")    // 한글/공백만 남김
+                .replace(/\s+/g, " ")           // 여러 공백 정리
                 .trim()
                 .split(" ")
-                .filter(w => w.length > 0);
+                .filter(w =>
+                    w.length > 1 &&             // 두 글자 이상
+                    /[가-힣]/.test(w)           // 한글 포함
+                );
 
-            // 추천 개수 공식: 텍스트 길이에 비례
             let n = Math.max(1, Math.floor(text.length / 100) + 1);
 
             // 단어 빈도 계산
@@ -37,10 +41,20 @@
                 freq[w] = (freq[w]||0) + 1;
             });
 
-            // 상위 n개 키워드 추천
-            let sorted = Object.entries(freq).sort((a,b)=>b[1]-a[1]);
-            let top = sorted.slice(0, n).map(([kw, cnt])=>`${kw}(${cnt})`).join(', ');
-            document.getElementById("result").innerText = top || "키워드 없음";
+            // 빈도 높은 순, 동일 빈도면 가나다순
+            let sorted = Object.entries(freq)
+                .sort((a,b)=>b[1]===a[1]? a[0].localeCompare(b[0]): b[1]-a[1]);
+
+            // 상위 n개 단어 + 동일 빈도 모두 표시
+            let resultArr = [];
+            let cutoff = sorted.length > 0 ? sorted[Math.min(n-1, sorted.length-1)][1] : 0;
+            sorted.forEach(([kw, cnt])=>{
+                if(cnt >= cutoff) resultArr.push(`${kw}(${cnt})`);
+            });
+
+            document.getElementById("result").innerText = resultArr.length ? resultArr.join(', ') : "키워드 없음";
+            // 콘솔에 실제 단어 리스트 출력(확인용)
+            console.log(words);
         }
     </script>
 </body>
