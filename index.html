@@ -20,18 +20,20 @@
     <script>
         function recommend() {
             let text = document.getElementById("textInput").value;
+            console.log("입력된 text 값:", text);
 
-            // 특수문자·영어·숫자 모두 제거, 한글 단어만 추출
-            // (한글 2글자 이상만 키워드로 인정)
+            // 한글 두 글자 이상 단어만 남김
             let words = text
-                .replace(/[^가-힣\s]/g, " ")    // 한글/공백만 남김
-                .replace(/\s+/g, " ")           // 여러 공백 정리
+                .replace(/[^가-힣\s]/g, " ")
+                .replace(/\s+/g, " ")
                 .trim()
                 .split(" ")
                 .filter(w =>
                     w.length > 1 &&             // 두 글자 이상
                     /[가-힣]/.test(w)           // 한글 포함
                 );
+
+            console.log("분리된 단어 배열:", words);
 
             let n = Math.max(1, Math.floor(text.length / 100) + 1);
 
@@ -53,8 +55,6 @@
             });
 
             document.getElementById("result").innerText = resultArr.length ? resultArr.join(', ') : "키워드 없음";
-            // 콘솔에 실제 단어 리스트 출력(확인용)
-            console.log(words);
         }
     </script>
 </body>
